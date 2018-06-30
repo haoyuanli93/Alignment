@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.ndimage as sn
 
 
 def get_radial_distribution(pattern, category_map, number_of_interval):
@@ -85,6 +86,63 @@ def get_pixel_map(values, ends, output_mode="in situ"):
         raise Exception("The value of the output_mode is invalid. Please use either \'in situ\' or \'per class\'. ")
 
 
-def get_coordinate_mesh(length_left, length_right, center):
-    coordinate_holder = None
-    pass
+def get_distance_mesh(x_map, y_map, z_map):
+    """
+    Get the length of the pixel with respect to the origin defined by the x_map, y_map and z_map
+    :param x_map: The x coordinate of each pixel.
+    :param y_map: The y coordinate of each pixel
+    :param z_map: The z coordinate of each pixel
+    :return: The distance of each pixel from the origin defined by the coordinate maps.
+    """
+    return np.sqrt(np.square(x_map) + np.square(y_map) + np.square(z_map))
+
+
+def get_rotational_inertia(data, x, y, z, pixel_num):
+    inertia = np.zeros((3, 3), dtype=np.float64)
+
+    # Calculate the Ixx term
+    inertia[0, 0] = np.sum(np.multiply(data,
+                                       np.multiply(y, y) + np.multiply(z, z)))
+
+    # Calculate the Ixy and Iyx term
+    inertia[0, 1] = - np.sum(np.multiply(data, np.multiply(x, y)))
+    inertia[1, 0] = inertia[0, 1]
+
+    # Calculate the Ixz and Izx term
+    inertia[0, 2] = - np.sum(np.multiply(data, np.multiply(x, y)))
+    inertia[2, 0] = inertia[0, 2]
+
+    # Calculate the Iyy term
+    inertia[1, 1] = np.sum(np.multiply(data,
+                                       np.multiply(x, x) + np.multiply(z, z)))
+
+    # Calculate the Iyz and Izy term
+    inertia[1, 2] = - np.sum(np.multiply(data, np.multiply(y, z)))
+    inertia[2, 1] = inertia[1, 2]
+
+    # Calculate the Izz term
+    inertia[2, 2] = np.sum(np.multiply(data,
+                                       np.multiply(x, x) + np.multiply(y, y)))
+
+    return inertia / float(pixel_num)
+
+
+def rotate_the_space(coordinate_map, matrix, value_map, output_shape):
+    """
+    Calculate the rotated image.
+
+    :param coordinate_map: The coordinate of the original image. [[x1,y1,z1],
+                                                                  [x2,y2,z2],
+                                                                  ...]
+    :param matrix: The rotation matrix
+    :param value_map: The value of for each pixel.
+    :param output_shape: The shape of the output array.
+    :return: The value at each pixel in the rotated space.
+    """
+    rotated_position = matrix.dot(coordinate_map)
+    interpolated_values = sn.map_coordinates(input=value_map,
+                                             coordinates=rotated_position,
+                                             order=1,
+                                             mode='constant',
+                                             cval=0.0)
+    return interpolated_values.reshape(output_shape)
