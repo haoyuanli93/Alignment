@@ -26,4 +26,6 @@ job_start = range_array[comm_rank, 0]
 job_stop = range_array[comm_rank, 1]
 
 # All node load the two arrays to compare
-
+with h5py.File('../input/category_1.h5','r') as h5file:
+        
+    fixed_target =
