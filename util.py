@@ -146,3 +146,91 @@ def rotate_the_space(coordinate_map, matrix, value_map, output_shape):
                                              mode='constant',
                                              cval=0.0)
     return interpolated_values.reshape(output_shape)
+
+
+# Sample through the rotation group SO(3)
+def angle_axis_to_mat(axis, theta):
+    """
+    Convert rotation with angle theta around a certain axis to a rotation matrix in 3D.
+    """
+    if len(axis) is not 3:
+        raise ValueError('Number of axis element must be 3!')
+    axis = axis.astype(float)
+    axis /= np.linalg.norm(axis)
+    a = axis[0]
+    b = axis[1]
+    c = axis[2]
+    cos_theta = np.cos(theta)
+    bracket = 1 - cos_theta
+    a_bracket = a * bracket
+    b_bracket = b * bracket
+    c_bracket = c * bracket
+    sin_theta = np.sin(theta)
+    asin_theta = a * sin_theta
+    bsin_theta = b * sin_theta
+    csin_theta = c * sin_theta
+    rot3d = np.array([[a * a_bracket + cos_theta, a * b_bracket - csin_theta, a * c_bracket + bsin_theta],
+                      [b * a_bracket + csin_theta, b * b_bracket + cos_theta, b * c_bracket - asin_theta],
+                      [c * a_bracket - bsin_theta, c * b_bracket + asin_theta, c * c_bracket + cos_theta]])
+    return rot3d
+
+
+def sample_full_2d_sphere(delta_theta, delta_phi):
+    """
+    Try to sample the 2d sphere as uniform as possible.
+    Notice that this is not a truly uniform sampling. But it's easy to implement to understand and can yield pretty
+    good sampling.
+
+    :param delta_theta: The expected space between thetas
+    :param delta_phi:  The expected space between phis
+    :return: The sampled result, the largest distances, the smallest distances.
+    """
+    # Create a holder for the result
+    holder = []
+
+    # Calculate how many circles to sample
+    circle_num = int(np.pi / delta_theta + 1)
+    # The actual space between the sampled points of theta
+    theta_step = np.pi / circle_num
+
+    # There are singularities at the poles, so they are treated separately.
+    for l in range(circle_num + 1):
+        # The length of the circle for the sampling of phi
+        length = 2 * np.pi * np.sin(l * theta_step)
+
+        # Deal with the poles
+        if length < delta_phi:
+            tmp = np.zeros((1, 3), dtype=np.float64)
+            tmp[0, 2] = np.sign(np.cos(l * theta_step))
+            # Save this result to the holder
+            holder.append(tmp)
+            continue
+
+        # The actual sample number for phi along this circle
+        phi_num = int(length / delta_phi)
+        # The actual space between the sampled points of phi
+        phi_step = 2 * np.pi / phi_num
+        # Calculate all the sampled phis
+        phi_list = np.arange(start=0, stop=phi_num, dtype=np.float64) * phi_step
+
+        # Create a tmp holder to store the points on this circle
+        tmp = np.ones((phi_num, 3), dtype=np.float64)
+        tmp[:, 0] = np.sin(l * theta_step) * np.cos(phi_list)
+        tmp[:, 1] = np.sin(l * theta_step) * np.sin(phi_list)
+        tmp[:, 2] = np.cos(l * theta_step)
+
+        # Save this result to the holder
+        holder.append(tmp)
+
+    # Chain together all the sampled directions
+    sample_list = np.concatenate(holder, axis=0)
+
+    # Distance
+    distance = np.sqrt(2.00001 - 2 * np.dot(sample_list, sample_list.T))
+    largest_distance = np.max(distance)
+
+    # Remove the diagonal values
+    np.fill_diagonal(distance, 5)
+    smallest_distance = np.min(distance)
+
+    return sample_list, largest_distance, smallest_distance
