@@ -182,7 +182,9 @@ def sample_full_2d_sphere(delta_theta, delta_phi):
     good sampling.
 
     :param delta_theta: The expected space between thetas
-    :param delta_phi:  The expected space between phis
+    :param delta_phi:  The expected space between phis on the sphere. Notice that this is a distance rather than
+                        the actual angle. Or equivalently, you may think of this as the angle difference along
+                        the equator.
     :return: The sampled result, the largest distances, the smallest distances.
     """
     # Create a holder for the result
@@ -234,3 +236,143 @@ def sample_full_2d_sphere(delta_theta, delta_phi):
     smallest_distance = np.min(distance)
 
     return sample_list, largest_distance, smallest_distance
+
+
+def sample_full_circle(delta_psi):
+    """
+    Sample the circle S1 uniformly
+
+    :param delta_psi: The expected space between psi
+    :return: The sampled result.
+    """
+
+    num = int(np.pi * 2 / delta_psi + 1)
+    return np.linspace(start=0, stop=np.pi * 2, endpoint=False, num=num)
+
+
+def sample_northern_pole(delta_theta, delta_phi, theta_range):
+    """
+    Try to sample a circular strip around the northern pole.
+
+    Notice that this is not a truly uniform sampling. But it's easy to implement to understand and can yield pretty
+    good sampling.
+
+    :param delta_theta: The expected space between thetas
+    :param delta_phi:  The expected space between phis on the sphere. Notice that this is a distance rather than
+                        the actual angle. Or equivalently, you may think of this as the angle difference along
+                        the equator.
+    :param theta_range: [The start of the searching region, the end of the searching region] a list or an array.
+    :return: The sampled result, the largest distances, the smallest distances.
+    """
+
+    # Check the parameter validity
+    if (theta_range[0] < 0) or (theta_range[1] <= theta_range[0]):
+        raise Exception("Please check the following:"
+                        "1. The value of both entry of theta range has to be within [0, pi]."
+                        "2. The second value in theta_range has to be larger than the first value.")
+
+    # Create a holder for the result
+    holder = []
+
+    # Calculate how many circles to sample
+    circle_num = int(np.abs(theta_range[1] - theta_range[0]) / delta_theta + 1)
+    # The actual space between the sampled points of theta
+    theta_list = np.linspace(start=theta_range[0], stop=theta_range[1], num=circle_num, endpoint=True)
+
+    # There are singularities at the poles, so they are treated separately.
+    for theta in theta_list:
+        # The length of the circle for the sampling of phi
+        length = 2 * np.pi * np.sin(theta)
+
+        # Deal with the poles
+        if length < delta_phi:
+            tmp = np.zeros((1, 3), dtype=np.float64)
+            tmp[0, 2] = np.sign(np.cos(theta))
+            # Save this result to the holder
+            holder.append(tmp)
+            continue
+
+        # The actual sample number for phi along this circle
+        phi_num = int(length / delta_phi)
+        # The actual space between the sampled points of phi
+        phi_step = 2 * np.pi / phi_num
+        # Calculate all the sampled phis
+        phi_list = np.arange(start=0, stop=phi_num, dtype=np.float64) * phi_step
+
+        # Create a tmp holder to store the points on this circle
+        tmp = np.ones((phi_num, 3), dtype=np.float64)
+        tmp[:, 0] = np.sin(theta) * np.cos(phi_list)
+        tmp[:, 1] = np.sin(theta) * np.sin(phi_list)
+        tmp[:, 2] = np.cos(theta)
+
+        # Save this result to the holder
+        holder.append(tmp)
+
+    # Chain together all the sampled directions
+    sample_list = np.concatenate(holder, axis=0)
+
+    # Distance
+    distance = np.sqrt(2.00001 - 2 * np.dot(sample_list, sample_list.T))
+    largest_distance = np.max(distance)
+
+    # Remove the diagonal values
+    np.fill_diagonal(distance, 5)
+    smallest_distance = np.min(distance)
+
+    return sample_list, largest_distance, smallest_distance
+
+
+def sample_part_of_circle(delta_psi, psi_range):
+    """
+    Sample a small portion of S1 uniformly.
+
+    :param delta_psi: The expected space between psi
+    :param psi_range: [The start of the searching region, the end of the searching region] a list or an array.
+    :return: The sampled result.
+    """
+
+    num = int(np.abs(psi_range[1] - psi_range[0]) / delta_psi + 1)
+    return np.linspace(start=psi_range[0], stop=psi_range[1], endpoint=True, num=num)
+
+
+def get_batch_num_list(total_num, batch_num):
+    """
+    Generate a list containing the data number per batch.
+    The idea is that the difference between each batches is at most one pattern.
+    :param total_num: The total number of patterns.
+    :param batch_num: The number of batches to build.
+    :return: A list containing the data number in each batch.
+    """
+
+    redundant_num = np.mod(total_num, batch_num)
+    if redundant_num != 0:
+        number_per_batch = total_num // batch_num
+        batch_num_list = [number_per_batch + 1, ] * redundant_num
+        batch_num_list += [number_per_batch, ] * (batch_num - redundant_num)
+    else:
+        number_per_batch = total_num // batch_num
+        batch_num_list = [number_per_batch, ] * batch_num
+
+    return batch_num_list
+
+
+def get_batch_range_list(batch_num_list):
+    """
+    Short hand to caonvet the batch_num_list to batch_range_list
+
+    :param batch_num_list: The number of batches to build.
+    :return: A numpy array containing the batch range for each range.
+                [
+                [start, end],
+                [start, end],
+                ...
+                ]
+    """
+
+    holder = np.zeros((len(batch_num_list), 2), dtype=np.int64)
+    tmp = np.cumsum([0, ] + batch_num_list)
+
+    holder[:, 0] = tmp[:-1]
+    holder[:, 1] = tmp[1:]
+
+    return holder
