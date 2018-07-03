@@ -376,3 +376,48 @@ def get_batch_range_list(batch_num_list):
     holder[:, 1] = tmp[1:]
 
     return holder
+
+
+def recover_the_transform(idx_to_inspect, axis_list, degree_list, shiftx_list, shifty_list, shiftz_list):
+    """
+    Recover the transformation based on the info of the index of the IoU list.
+
+    :param idx_to_inspect: The index to inspect
+    :param axis_list:  The numpy array containing all the rotation axis
+    :param degree_list: The numpy array containing all the rotation degrees
+    :param shiftx_list: The numpy array containing all shift along x direction.
+    :param shifty_list:  The numpy array containing all shift along y direction.
+    :param shiftz_list:  The numpy array containing all shift along z direction.
+    :return: rotation axis, rotation degree, [shift vector x,y,z]
+    """
+
+    # Get the length of each list
+    degree_num = degree_list.shape[0]
+    x_num = shiftx_list.shape[0]
+    y_num = shifty_list.shape[0]
+    z_num = shiftz_list.shape[0]
+
+    # Calculate the shift along z
+    z_idx = np.mod(idx_to_inspect, z_num).astype(np.int64)
+    # Modify the index
+    np.floor_divide(idx_to_inspect, z_num, dtype=np.int64)
+
+    # Calculate the shift along y
+    y_idx = np.mod(idx_to_inspect, y_num).astype(np.int64)
+    # Modify the index
+    np.floor_divide(idx_to_inspect, y_num, dtype=np.int64)
+
+    # Calculate the shift along x
+    x_idx = np.mod(idx_to_inspect, x_num).astype(np.int64)
+    # Modify the index
+    np.floor_divide(idx_to_inspect, x_num, dtype=np.int64)
+
+    # Calculate the degree idx
+    degree_idx = np.mod(idx_to_inspect, degree_num).astype(np.int64)
+    # Modify the index
+    np.floor_divide(idx_to_inspect, degree_num, dtype=np.int64)
+
+    # Calculate the axis idx
+    axis_idx = int(idx_to_inspect)
+
+    return axis_list[axis_idx], degree_list[degree_idx], [shiftx_list[x_idx], shifty_list[y_idx], shiftz_list[z_idx]]
