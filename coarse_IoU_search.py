@@ -33,7 +33,7 @@ job_num = job_stop - job_start
 
 # Create a holder to store all the IoU value
 degree_num = degrees.shape[0]
-IoU_list = numpy.zeros(job_num * degrees * (2 * translation_range) ** 3, dtype=numpy.float64)
+IoU_list = numpy.zeros(job_num * degree_num * (2 * translation_range) ** 3, dtype=numpy.float64)
 print("Node {} needs to calculate {} IoU values".format(comm_rank, IoU_list.shape[0]))
 
 # All node load the two arrays to compare
