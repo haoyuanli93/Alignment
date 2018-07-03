@@ -6,6 +6,7 @@ import scipy.ndimage.interpolation
 import numpy
 import util
 from mpi4py import MPI
+import time
 
 # Initialize the MPI
 comm = MPI.COMM_WORLD
@@ -49,6 +50,8 @@ union = numpy.zeros_like(movable_target)
 tmp_idx = 0
 # Loop through rotations and translations
 for axis_idx in range(job_start, job_stop):
+    # Calculate the time
+    tic = time.time()
     for degree in degrees:
         # Calculate the affine map to use scipy.ndimage.affine_transform
         rotation_matrix = util.angle_axis_to_mat(axis=directions[axis_idx], theta=degree)
@@ -84,7 +87,9 @@ for axis_idx in range(job_start, job_stop):
 
                     # Calculate the IoU
                     IoU_list[tmp_idx] = numpy.sum(intersection) / numpy.sum(union)
-
+    toc = time.time()
+    if comm_rank == 0:
+        print("It takes {} seconds to calculate all IoUs for a single axis.".format(toc - tic))
 comm.Barriar()
 # Step 2: One node collect all the IoU and find the best result
 IoU_data = comm.gather(IoU_list, root=0)
