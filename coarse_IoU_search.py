@@ -18,7 +18,7 @@ delta_degree = 0.15
 translation_range = 4
 
 # Define target parameter
-input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_sample_1.npy'
+input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_category_1.npy'
 object_shape = numpy.array([27, ] * 3, dtype=numpy.int64)
 tag = 1
 
@@ -65,7 +65,6 @@ for axis_idx in range(job_start, job_stop):
         scipy.ndimage.affine_transform(input=movable_target,
                                        matrix=rotation_matrix,
                                        offset=offset,
-                                       output_shape=object_shape,
                                        output=rotated,
                                        order=1,
                                        mode='constant', cval=0.0, prefilter=True)
