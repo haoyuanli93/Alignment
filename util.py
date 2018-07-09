@@ -421,3 +421,16 @@ def recover_the_transform(idx_to_inspect, axis_list, degree_list, shiftx_list, s
     axis_idx = int(idx_to_inspect)
 
     return axis_list[axis_idx], degree_list[degree_idx], [shiftx_list[x_idx], shifty_list[y_idx], shiftz_list[z_idx]]
+
+
+def get_mass_center(obj):
+    # Create a coordinate grid
+    space_size = obj.shape
+    coor_grid = np.meshgrid(np.arange(space_size[0]), np.arange(space_size[1]), np.arange(space_size[2]))
+
+    # Calculate the mass center
+    holder = np.zeros(3)
+    for axis in range(3):
+        holder[axis] = np.sum(np.multiply(coor_grid[axis], obj)) / np.sum(obj)
+
+    return holder

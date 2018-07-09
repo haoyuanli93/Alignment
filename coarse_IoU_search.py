@@ -15,10 +15,11 @@ comm_size = comm.Get_size()
 
 # Define sampling param
 delta_degree = 0.15
-translation_range = 10
+translation_range = 4
 
 # Define target parameter
-input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/normalized_sample_1.npy'
+input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_sample_1.npy'
+object_shape = numpy.array([27, ] * 3, dtype=numpy.int64)
 tag = 1
 
 # All the node generate a sampling of the directions and degrees to inspect
@@ -37,8 +38,11 @@ IoU_list = numpy.zeros(job_num * degree_num * (2 * translation_range) ** 3, dtyp
 print("Node {} needs to calculate {} IoU values".format(comm_rank, IoU_list.shape[0]))
 
 # All node load the two arrays to compare
-fixed_target = numpy.load('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/complete.npy')
+fixed_target = numpy.load('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_complete.npy')
 movable_target = numpy.load(input_file)
+
+# Obtain the center of mass of the movable target
+center = util.get_mass_center(movable_target)
 
 # Create holders which will be reused again and again
 rotated = numpy.zeros_like(movable_target)
@@ -55,13 +59,13 @@ for axis_idx in range(job_start, job_stop):
     for degree in degrees:
         # Calculate the affine map to use scipy.ndimage.affine_transform
         rotation_matrix = util.angle_axis_to_mat(axis=directions[axis_idx], theta=degree)
-        offset = numpy.array([63, ] * 3) - rotation_matrix.dot(numpy.array([63, ] * 3))
+        offset = center - rotation_matrix.dot(center)
 
         # Rotate the sample space
         scipy.ndimage.affine_transform(input=movable_target,
                                        matrix=rotation_matrix,
                                        offset=offset,
-                                       output_shape=(128, 128, 128),
+                                       output_shape=object_shape,
                                        output=rotated,
                                        order=1,
                                        mode='constant', cval=0.0, prefilter=True)
