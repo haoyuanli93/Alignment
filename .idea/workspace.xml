@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d6972774-d48f-4f0e-9691-a52606a56ba8" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/local_IoU_search.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coarse_IoU_search.py" beforeDir="false" afterPath="$PROJECT_DIR$/global_IoU_search.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test-coarse-search.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/test-coarse-search.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -22,7 +20,7 @@
       <file leaf-file-name="util.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/util.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
+            <state relative-caret-position="1368">
               <caret line="334" column="85" lean-forward="true" selection-start-line="334" selection-start-column="85" selection-end-line="334" selection-end-column="85" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -34,8 +32,8 @@
       <file leaf-file-name="global_IoU_search.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/global_IoU_search.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="779">
-              <caret line="140" lean-forward="true" selection-start-line="140" selection-end-line="140" />
+            <state relative-caret-position="304">
+              <caret line="37" column="52" selection-start-line="37" selection-start-column="31" selection-end-line="37" selection-end-column="52" />
               <folding>
                 <element signature="e#225#245#0" expanded="true" />
               </folding>
@@ -43,7 +41,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="local_IoU_search.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="532">
+                <caret line="28" column="62" selection-start-line="28" selection-start-column="62" selection-end-line="28" selection-end-column="62" />
+              </first_editor>
+              <second_editor />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="local_IoU_search.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/local_IoU_search.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-1634">
@@ -91,6 +101,7 @@
         <option value="$PROJECT_DIR$/coarse_IoU_search.py" />
         <option value="$PROJECT_DIR$/local_IoU_search.py" />
         <option value="$PROJECT_DIR$/global_IoU_search.py" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -434,9 +445,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/local_IoU_search.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1634">
+          <caret line="14" column="22" lean-forward="true" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
+          <folding>
+            <element signature="e#225#245#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/util.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
+        <state relative-caret-position="1368">
           <caret line="334" column="85" lean-forward="true" selection-start-line="334" selection-start-column="85" selection-end-line="334" selection-end-column="85" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -446,21 +467,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/global_IoU_search.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="779">
-          <caret line="140" lean-forward="true" selection-start-line="140" selection-end-line="140" />
+        <state relative-caret-position="304">
+          <caret line="37" column="52" selection-start-line="37" selection-start-column="31" selection-end-line="37" selection-end-column="52" />
           <folding>
             <element signature="e#225#245#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/local_IoU_search.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1634">
-          <caret line="14" column="22" lean-forward="true" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
-          <folding>
-            <element signature="e#225#245#0" expanded="true" />
-          </folding>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="532">
+            <caret line="28" column="62" selection-start-line="28" selection-start-column="62" selection-end-line="28" selection-end-column="62" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>
