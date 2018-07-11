@@ -25,7 +25,7 @@ comm_size = comm.Get_size()
 # Define sampling param
 delta_degree = 0.075
 angle_range = 1.
-shift_list = numpy.linspace(start=-2, stop=2, num=10, endpoint=True)
+shift_list = numpy.linspace(start=-2, stop=2, num=11, endpoint=True)
 shift_num = shift_list.shape[0]
 
 # Define target parameter
