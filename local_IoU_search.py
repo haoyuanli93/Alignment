@@ -32,15 +32,14 @@ shift_num = shift_list.shape[0]
 # Parse
 args = parser.parse_args()
 cat_param = args.cat_num  # Specify which reconstruction to align
-input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/alignment/output/aligned_{}_coarse.npy'.format(cat_param)
+input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/aligned_{}_coarse.npy'.format(cat_param)
 object_shape = numpy.array([27, ] * 3, dtype=numpy.int64)
 tag = args.tag
 
 # All the node generate a sampling of the directions and degrees to inspect
-directions, _, dist_min = util.sample_northern_pole(delta_theta=delta_degree,
-                                                    delta_phi=delta_degree,
-                                                    theta_range=angle_range)
-degrees = util.sample_part_of_circle(delta_psi=delta_degree, psi_range=angle_range)
+directions, _, dist_min = util.sample_full_2d_sphere(delta_theta=delta_degree,
+                                                    delta_phi=delta_degree)
+degrees = util.sample_part_of_circle(delta_psi=delta_degree, psi_range=[-angle_range, angle_range])
 
 # All nodes generate a job list and find the portion of jobs belonging to itself.
 range_array = util.get_batch_range_list(util.get_batch_num_list(directions.shape[0], batch_num=comm_size))
