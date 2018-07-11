@@ -10,6 +10,12 @@ import numpy
 import util
 from mpi4py import MPI
 import time
+import argparse
+
+# Parse the parameters
+parser = argparse.ArgumentParser()
+parser.add_argument('--cat_num', type=int, help="Specify the category to align.")
+parser.add_argument('--tag', type=str, help="Specify the tag of the saved file.")
 
 # Initialize the MPI
 comm = MPI.COMM_WORLD
@@ -21,10 +27,12 @@ delta_degree = 0.15
 translation_range = 4
 
 # Define target parameter
-cat_param = 0  # Specify which reconstruction to align
+# Parse
+args = parser.parse_args()
+cat_param = args.cat_num  # Specify which reconstruction to align
 input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_category_{}.npy'.format(cat_param)
 object_shape = numpy.array([27, ] * 3, dtype=numpy.int64)
-tag = "coarse"
+tag = args.tag
 
 # All the node generate a sampling of the directions and degrees to inspect
 directions, _, dist_min = util.sample_full_2d_sphere(delta_theta=delta_degree, delta_phi=delta_degree)
@@ -107,12 +115,23 @@ comm.Barrier()
 IoU_data = comm.gather(IoU_list, root=0)
 
 if comm_rank == 0:
+    # Assemble all the IoU values
     IoU_all = numpy.concatenate(IoU_data)
+    shift_list = numpy.arange(start=-translation_range, stop=translation_range)
+
     # Save all the IoU values for independent varifications
-    numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/IoU_all_{}.npy'.format(tag), IoU_all)
+    numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/IoU_all_{}_{}.npy'.format(cat_param, tag),
+               IoU_all)
+    # Save all the translations for independent varifications
+    numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/axis_all_{}_{}.npy'.format(cat_param, tag),
+               directions)
+    numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/angle_all_{}_{}.npy'.format(cat_param, tag),
+               degrees)
+    numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/shift_all_{}_{}.npy'.format(cat_param, tag),
+               shift_list)
+
     # Find the corresponding transformation
     index = numpy.argmax(IoU_all)
-    shift_list = numpy.arange(start=-translation_range, stop=translation_range)
     axis, angle, shift = util.recover_the_transform(index, directions, degrees, shift_list, shift_list, shift_list)
     # Calculate the corresponding transformed volume
     transformed = util.rotation_and_shift(obj=movable_target, axis=axis, angle=angle, shift=shift)
