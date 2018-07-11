@@ -424,6 +424,11 @@ def recover_the_transform(idx_to_inspect, axis_list, degree_list, shiftx_list, s
 
 
 def get_mass_center(obj):
+    """
+    Calculate the mass center of the object in the space. The origin is at [0,0,0] position
+    :param obj: A 3D numpy array containing the density
+    :return: A 1D numpy array center_of_mass = [a,b,c]
+    """
     # Create a coordinate grid
     space_size = obj.shape
     coor_grid = np.meshgrid(np.arange(space_size[0]), np.arange(space_size[1]), np.arange(space_size[2]))
@@ -434,3 +439,39 @@ def get_mass_center(obj):
         holder[axis] = np.sum(np.multiply(coor_grid[axis], obj)) / np.sum(obj)
 
     return holder
+
+
+def rotation_and_shift(obj, axis, angle, shift):
+    """
+    This function calculate the transformed volume. One first performs the rotation defined by the axis and the angle
+    with respect to the center of mass of the space and then shift the space according to shift.
+
+    :param obj: A 3D numpy array containing the density
+    :param axis: The axis of rotation.
+    :param angle: The angle of rotation around that axis
+    :param shift: The displacement vector of the shift operation.
+    :return: The transformed volume. A 3D numpy array.
+    """
+    # Obtain the center of mass of the movable target
+    center = get_mass_center(obj)
+
+    # Calculate the affine map to use scipy.ndimage.affine_transform
+    rotation_matrix = angle_axis_to_mat(axis=axis, theta=angle)
+    offset = center - rotation_matrix.dot(center)
+
+    # Rotate the sample space
+    rotated = sn.affine_transform(input=obj,
+                                  matrix=rotation_matrix,
+                                  offset=offset,
+                                  order=1,
+                                  mode='constant', cval=0.0, prefilter=True)
+
+    # shift
+    shifted = sn.interpolation.shift(input=rotated,
+                                     shift=shift,
+                                     order=1,
+                                     mode='constant',
+                                     cval=0.0,
+                                     prefilter=True)
+
+    return shifted

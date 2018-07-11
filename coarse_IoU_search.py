@@ -1,5 +1,8 @@
 """
 This script implement the brute force search strategy with mpi4py enhancement
+
+This script performs the coarse searching. The alignment is carried out with
+respect to the reconstruction with all diffraction patterns.
 """
 import scipy.ndimage
 import scipy.ndimage.interpolation
@@ -18,9 +21,10 @@ delta_degree = 0.15
 translation_range = 4
 
 # Define target parameter
-input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_category_1.npy'
+cat_param = 0  # Specify which reconstruction to align
+input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_category_{}.npy'.format(cat_param)
 object_shape = numpy.array([27, ] * 3, dtype=numpy.int64)
-tag = 1
+tag = "coarse"
 
 # All the node generate a sampling of the directions and degrees to inspect
 directions, _, dist_min = util.sample_full_2d_sphere(delta_theta=delta_degree, delta_phi=delta_degree)
@@ -90,10 +94,10 @@ for axis_idx in range(job_start, job_stop):
 
                     # Calculate the IoU
                     IoU_list[tmp_idx] = numpy.sum(intersection) / numpy.sum(union)
-                    
+
                     # Update the index
                     tmp_idx += 1
-                    
+
     toc = time.time()
     if comm_rank == 0:
         print("It takes {} seconds to calculate all IoUs for a single axis.".format(toc - tic))
@@ -104,4 +108,14 @@ IoU_data = comm.gather(IoU_list, root=0)
 
 if comm_rank == 0:
     IoU_all = numpy.concatenate(IoU_data)
+    # Save all the IoU values for independent varifications
     numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/IoU_all_{}.npy'.format(tag), IoU_all)
+    # Find the corresponding transformation
+    index = numpy.argmax(IoU_all)
+    shift_list = numpy.arange(start=-translation_range, stop=translation_range)
+    axis, angle, shift = util.recover_the_transform(index, directions, degrees, shift_list, shift_list, shift_list)
+    # Calculate the corresponding transformed volume
+    transformed = util.rotation_and_shift(obj=movable_target, axis=axis, angle=angle, shift=shift)
+    # Save this transformed volume
+    numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/aligned_{}_{}.npy'.format(cat_param, tag),
+               transformed)
