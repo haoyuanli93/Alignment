@@ -90,10 +90,15 @@ for axis_idx in range(job_start, job_stop):
 
                     # Calculate the IoU
                     IoU_list[tmp_idx] = numpy.sum(intersection) / numpy.sum(union)
+                    
+                    # Update the index
+                    tmp_idx += 1
+                    
     toc = time.time()
     if comm_rank == 0:
         print("It takes {} seconds to calculate all IoUs for a single axis.".format(toc - tic))
-comm.Barriar()
+
+comm.Barrier()
 # Step 2: One node collect all the IoU and find the best result
 IoU_data = comm.gather(IoU_list, root=0)
 

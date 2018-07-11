@@ -400,22 +400,22 @@ def recover_the_transform(idx_to_inspect, axis_list, degree_list, shiftx_list, s
     # Calculate the shift along z
     z_idx = np.mod(idx_to_inspect, z_num).astype(np.int64)
     # Modify the index
-    np.floor_divide(idx_to_inspect, z_num, dtype=np.int64)
+    idx_to_inspect = np.floor_divide(idx_to_inspect, z_num, dtype=np.int64)
 
     # Calculate the shift along y
     y_idx = np.mod(idx_to_inspect, y_num).astype(np.int64)
     # Modify the index
-    np.floor_divide(idx_to_inspect, y_num, dtype=np.int64)
+    idx_to_inspect = np.floor_divide(idx_to_inspect, y_num, dtype=np.int64)
 
     # Calculate the shift along x
     x_idx = np.mod(idx_to_inspect, x_num).astype(np.int64)
     # Modify the index
-    np.floor_divide(idx_to_inspect, x_num, dtype=np.int64)
+    idx_to_inspect = np.floor_divide(idx_to_inspect, x_num, dtype=np.int64)
 
     # Calculate the degree idx
     degree_idx = np.mod(idx_to_inspect, degree_num).astype(np.int64)
     # Modify the index
-    np.floor_divide(idx_to_inspect, degree_num, dtype=np.int64)
+    idx_to_inspect = np.floor_divide(idx_to_inspect, degree_num, dtype=np.int64)
 
     # Calculate the axis idx
     axis_idx = int(idx_to_inspect)
