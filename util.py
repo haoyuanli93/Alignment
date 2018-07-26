@@ -475,3 +475,24 @@ def rotation_and_shift(obj, axis, angle, shift):
                                      prefilter=True)
 
     return shifted
+
+
+def get_IoU_inplace(shifted, fixed, cap_holder, cup_holder):
+    """
+    Get the intersection over union value of the two objects. The situation is my mind for this function is
+    that we have a fixed object, and a shifted object. The shift is small. We want to calculate the IoU
+    a lot of times. Therefore, two holders are created to hold the intersection and the union space.
+
+    :param shifted: The shifted object.
+    :param fixed: The fixed object.
+    :param cap_holder: The numpy array to hold the intersection of the two object.
+    :param cup_holder: The numpy array to hold the union of the two object
+    :return: The IoU value.
+    """
+
+    # Calculate the intersection
+    np.minimum(shifted, fixed, out=cap_holder)
+    # Calculate the union
+    np.maximum(shifted, fixed, out=cup_holder)
+
+    return np.sum(cap_holder) / np.sum(cup_holder)
