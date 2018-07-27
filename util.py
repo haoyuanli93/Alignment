@@ -496,3 +496,21 @@ def get_IoU_inplace(shifted, fixed, cap_holder, cup_holder):
     np.maximum(shifted, fixed, out=cup_holder)
 
     return np.sum(cap_holder) / np.sum(cup_holder)
+
+
+def get_IoU(shifted, fixed):
+    """
+    Get the intersection over union value of the two objects. This function is not very efficient if one needs to
+    calculate the IoU values for a lot of different objects with the same shape.
+
+    :param shifted: The shifted object.
+    :param fixed: The fixed object.
+    :return: The IoU value.
+    """
+
+    # Calculate the intersection
+    inter = np.minimum(shifted, fixed)
+    # Calculate the union
+    union = np.maximum(shifted, fixed)
+
+    return np.sum(inter) / np.sum(union)
