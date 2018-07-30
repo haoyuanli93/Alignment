@@ -8,7 +8,7 @@ import numpy
 import util
 
 
-def calculate_IoU(movable_target, fixed_target, job_start, job_stop, directions, degrees, shift_list):
+def calculate_iou(movable_target, fixed_target, job_start, job_stop, directions, degrees, shift_list):
     """
     This function is a simple abbreviation of the existing local searching procedure.
 
@@ -79,5 +79,37 @@ def calculate_IoU(movable_target, fixed_target, job_start, job_stop, directions,
     return IoU_list
 
 
-def find_the_optimal_position():
-    pass
+def transform_to_the_optimal_orientation(iou_all, movable_target, directions, degrees, shift_list):
+    """
+    This is an abbreviation of the corresponding code to generate the object which has been moved
+    to the optimal orientation at current searching precision.
+    :param iou_all: The IoU value of all different configurations.
+    :param movable_target: The object to be rotated and shifted
+    :param directions: The list of all different rotation axises.
+    :param degrees: The list of all rotation angles.
+    :param shift_list: The list of all shift
+    :return: The object which has been transformed to the optimal orientation.
+    """
+    # Find the corresponding transformation
+    index = numpy.argmax(iou_all)
+    axis, angle, shift = util.recover_the_transform(index, directions, degrees, shift_list, shift_list, shift_list)
+    # Calculate the corresponding transformed volume
+    return util.rotation_and_shift(obj=movable_target, axis=axis, angle=angle, shift=shift)
+
+
+def get_degree_and_shift_list(degree_num, shift_num, degree_spacing, shift_spacing):
+    """
+    This is an abbreviation of the corresponding code to generate the degree list and shift list.
+
+    :param degree_num: The number of degrees to generate.
+    :param shift_num: The number of shifts to generate
+    :param degree_spacing: The spacing between adjacent different degrees.
+    :param shift_spacing: The spacing between adjacent different degrees.
+    :return: The degree array, the shift array.
+    """
+    half_degree_num = int((degree_num - 1) / 2)
+    half_shift_num = int((shift_num - 1) / 2)
+
+    degree_list = numpy.arange(-half_degree_num, half_degree_num) * degree_spacing
+    shift_list = numpy.arange(-half_shift_num, half_shift_num) * shift_spacing
+    return degree_list, shift_list
