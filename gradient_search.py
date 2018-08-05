@@ -1,7 +1,7 @@
-import numpy
+import numpy, os, h5py
 import util, tmp
 from mpi4py import MPI
-import time
+import time, datetime
 import argparse
 
 ########################################################################################################################
@@ -9,8 +9,10 @@ import argparse
 ########################################################################################################################
 # Define the parameters
 parser = argparse.ArgumentParser()
-parser.add_argument('--cat_num', type=int, help="Specify the category to align.")
-parser.add_argument('--tag', type=str, help="Specify the tag of the saved file.")
+parser.add_argument('--output', type=str, help="Specify the output folder.")
+parser.add_argument('--movable_target', type=str, help="Specify the movable target.")
+parser.add_argument('--fixed_target', type=str, help="Specify the fixed target.")
+parser.add_argument('--tag', type=str, help="Some tag to distinguish this result from the others.")
 
 # Initialize the MPI
 comm = MPI.COMM_WORLD
@@ -19,10 +21,36 @@ comm_size = comm.Get_size()
 
 # Parse
 args = parser.parse_args()
-cat_param = args.cat_num  # Specify which reconstruction to align
-input_file = '/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/aligned_{}_coarse.npy'.format(cat_param)
-object_shape = numpy.array([27, ] * 3, dtype=numpy.int64)
+input_fixed = args.fixed_target
+input_movable = args.movable_target
+output_address = args.output
 tag = args.tag
+
+# Check the parameters
+if comm_rank == 0:
+    # The first node check if the output folder exist
+    if not os.path.isdir(output_address):
+        # Create a folder in the output address
+        os.makedirs(output_address)
+
+    # Create a time stamp
+    stamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d_%H_%M_%S')
+    # Prepare the file name
+    if tag:
+        file_name = output_address + '/gradient_output_{}_{}.h5'.format(tag, stamp)
+    else:
+        file_name = output_address + '/gradient_output_{}.h5'.format(stamp)
+
+    # Create a h5py file to hold the results
+    with h5py.File(file_name, 'w') as h5file:
+        pass
+
+comm.Barrier()
+
+# Load the files and check the shape
+fixed_target = numpy.load(input_fixed)
+movable_target = numpy.load(input_movable)
+object_shape = movable_target.shape
 
 # Generate a searching precision list
 """
@@ -32,10 +60,6 @@ of the rotation angle.
 iteration_number = 9
 degree_spacing_list = numpy.power(0.5, numpy.arange(1, 10)) / 10.
 shift_spacing_list = numpy.power(0.5, numpy.arange(0, 9))
-
-# All node load the two arrays to compare
-fixed_target = numpy.load('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/input/chop_complete.npy')
-movable_target = numpy.load(input_file)
 
 # Initialize the sampling of rotation axises.
 direction_spacing = 0.1
@@ -82,12 +106,20 @@ for l in range(iteration_number):
 
     if comm_rank == 0:
         IoU_all = numpy.concatenate(IoU_data)
-        transformed = tmp.transform_to_the_optimal_orientation(iou_all=IoU_all, movable_target=movable_target,
-                                                               directions=directions, degrees=degrees,
-                                                               shift_list=shift_list)
+        transformed, _axis, _angle, _shift, _iou = tmp.to_optimal_orientation(iou_all=IoU_all,
+                                                                              movable_target=movable_target,
+                                                                              directions=directions,
+                                                                              degrees=degrees,
+                                                                              shift_list=shift_list)
+
         # Save this transformed volume
-        numpy.save('/reg/d/psdm/amo/amo86615/res/haoyuan/alignment/output/aligned_{}_step{}.npy'.format(cat_param, l),
-                   transformed)
+        with h5py.File(file_name, 'r+') as h5file:
+            grp = h5file.create_group("step_{}".format(l))
+            grp.create_dataset('volume', data=transformed)
+            grp.create_dataset('axis', data=_axis)
+            grp.create_dataset('angle', data=_angle)
+            grp.create_dataset('shift', data=_shift)
+            grp.create_dataset('iou', data=_iou)
 
         # After this iteration, replace movable_target with this optimal value.
         movable_target = transformed

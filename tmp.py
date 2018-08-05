@@ -79,7 +79,7 @@ def calculate_iou(movable_target, fixed_target, job_start, job_stop, directions,
     return IoU_list
 
 
-def transform_to_the_optimal_orientation(iou_all, movable_target, directions, degrees, shift_list):
+def to_optimal_orientation(iou_all, movable_target, directions, degrees, shift_list):
     """
     This is an abbreviation of the corresponding code to generate the object which has been moved
     to the optimal orientation at current searching precision.
@@ -94,7 +94,8 @@ def transform_to_the_optimal_orientation(iou_all, movable_target, directions, de
     index = numpy.argmax(iou_all)
     axis, angle, shift = util.recover_the_transform(index, directions, degrees, shift_list, shift_list, shift_list)
     # Calculate the corresponding transformed volume
-    return util.rotation_and_shift(obj=movable_target, axis=axis, angle=angle, shift=shift)
+    rotated_object = util.rotation_and_shift(obj=movable_target, axis=axis, angle=angle, shift=shift)
+    return rotated_object, axis, angle, shift, iou_all[index]
 
 
 def get_degree_and_shift_list(degree_num, shift_num, degree_spacing, shift_spacing):
