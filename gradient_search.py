@@ -43,7 +43,8 @@ if comm_rank == 0:
 
     # Create a h5py file to hold the results
     with h5py.File(file_name, 'w') as h5file:
-        pass
+        h5file.create_dataset("fixed_target", data=input_fixed)
+        h5file.create_dataset("movable_target", data=input_movable)
 
 comm.Barrier()
 
