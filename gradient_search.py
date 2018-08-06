@@ -71,7 +71,7 @@ degree_num = 21
 shift_num = 11
 
 # All nodes generate a job list and find the portion of jobs belonging to itself.
-range_array = util.get_batch_range_list(util.get_batch_num_list(directions.shape[0], batch_num=comm_size - 1))
+range_array = util.get_batch_range_list(util.get_batch_num_list(directions.shape[0], batch_num=comm_size))
 job_start = range_array[comm_rank, 0]
 job_stop = range_array[comm_rank, 1]
 job_num = job_stop - job_start
