@@ -98,19 +98,22 @@ def to_optimal_orientation(iou_all, movable_target, directions, degrees, shift_l
     return rotated_object, axis, angle, shift, iou_all[index]
 
 
-def get_degree_and_shift_list(degree_num, shift_num, degree_spacing, shift_spacing):
+def get_degree_and_shift_list(degree_num, shift_num, degree_range, shift_range):
     """
     This is an abbreviation of the corresponding code to generate the degree list and shift list.
 
     :param degree_num: The number of degrees to generate.
     :param shift_num: The number of shifts to generate
-    :param degree_spacing: The spacing between adjacent different degrees.
-    :param shift_spacing: The spacing between adjacent different degrees.
+    :param degree_range: The spacing between adjacent different degrees.
+    :param shift_range: The spacing between adjacent different degrees.
     :return: The degree array, the shift array.
     """
-    half_degree_num = int((degree_num - 1) / 2)
-    half_shift_num = int((shift_num - 1) / 2)
 
-    degree_list = numpy.arange(-half_degree_num, half_degree_num) * degree_spacing
-    shift_list = numpy.arange(-half_shift_num, half_shift_num) * shift_spacing
+    # Create the degree list
+    holder = numpy.arange(-degree_num, degree_num + 1, dtype=numpy.float64) / degree_num
+    degree_list = degree_range * holder**3
+
+    holder = numpy.arange(-shift_num, shift_num + 1, dtype=numpy.float64) / shift_num
+    shift_list = shift_range * holder ** 3
+
     return degree_list, shift_list

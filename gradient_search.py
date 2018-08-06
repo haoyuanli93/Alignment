@@ -58,17 +58,18 @@ object_shape = movable_target.shape
 Due to my current setup, the searching precision is decided by the spatial precision and the angular precision
 of the rotation angle.
 """
-iteration_number = 2
-degree_spacing_list = numpy.power(0.5, numpy.arange(1, 10)) / 10.
-shift_spacing_list = numpy.power(0.5, numpy.arange(0, 9))
+iteration_number = 5
+
+# specify some parameter concerning the searching of the rotation and translation.
+degree_num = 8
+shift_num = 5
+
+degree_range_list = numpy.square(2. / numpy.arange(1, iteration_number + 1))
+shift_range_list = 5 / numpy.arange(1, iteration_number + 1)
 
 # Initialize the sampling of rotation axises.
 direction_spacing = 0.2
 directions, _, dist_min = util.sample_full_2d_sphere(delta_theta=direction_spacing, delta_phi=direction_spacing)
-
-# specify some parameter concerning the searching of the rotation and translation.
-degree_num = 19
-shift_num = 9
 
 # All nodes generate a job list and find the portion of jobs belonging to itself.
 range_array = util.get_batch_range_list(util.get_batch_num_list(directions.shape[0], batch_num=comm_size))
@@ -77,7 +78,7 @@ job_stop = range_array[comm_rank, 1]
 job_num = job_stop - job_start
 
 # Create a holder to store all the IoU value
-IoU_list = numpy.zeros(job_num * degree_num * shift_num ** 3, dtype=numpy.float64)
+IoU_list = numpy.zeros(job_num * (2 * degree_num + 1) * (2 * shift_num + 1) ** 3, dtype=numpy.float64)
 print("Node {} needs to calculate {} IoU values".format(comm_rank, IoU_list.shape[0]))
 
 # Create a new variable to check the calculation time
@@ -89,15 +90,15 @@ times_stop = []
 ########################################################################################################################
 for l in range(iteration_number):
     # Generate the degree list and shift list to investigate
-    degrees, shift_list = tmp.get_degree_and_shift_list(degree_num=degree_num, degree_spacing=degree_spacing_list[l],
-                                                        shift_num=shift_num, shift_spacing=shift_spacing_list[l])
+    degrees, shift_list = tmp.get_degree_and_shift_list(degree_num=degree_num, degree_range=degree_range_list[l],
+                                                        shift_num=shift_num, shift_range=shift_range_list[l])
     tic = time.time()
     times_start.append(tic)
     # Each node calculate the corresponding IoU values
     IoU_list = tmp.calculate_iou(movable_target=movable_target, fixed_target=fixed_target,
                                  job_start=job_start, job_stop=job_stop,
                                  directions=directions, degrees=degrees, shift_list=shift_list)
-    print("HHH", numpy.max(IoU_list))
+
     toc = time.time()
     times_stop.append(toc)
     print("Node {} takes {:.2f} seconds to calculate {} IoU values.".format(comm_rank, toc - tic, IoU_list.shape[0]))
@@ -117,7 +118,7 @@ for l in range(iteration_number):
         # Save this transformed volume
         with h5py.File(file_name, 'r+') as h5file:
             grp = h5file.create_group("step_{}".format(l))
-            grp.create_dataset('iou_all', data=IoU_all)
+            # grp.create_dataset('iou_all', data=IoU_all)
             grp.create_dataset('volume', data=transformed)
             grp.create_dataset('axis', data=_axis)
             grp.create_dataset('angle', data=_angle)
