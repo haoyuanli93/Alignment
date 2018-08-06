@@ -125,9 +125,10 @@ for l in range(iteration_number):
         # After this iteration, replace movable_target with this optimal value.
         movable_target = transformed
 
-# Refresh the movable target across all the nodes.
-movable_target = comm.Bcast(movable_target, root=0)
-comm.Barrier()
+    comm.Barrier()
+    # Refresh the movable target across all the nodes.
+    movable_target = comm.Bcast(movable_target, root=0)
+    comm.Barrier()
 
 ########################################################################################################################
 # Step 3: Do several other iterations of search

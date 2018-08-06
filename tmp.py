@@ -52,7 +52,7 @@ def calculate_iou(movable_target, fixed_target, job_start, job_stop, directions,
                                            order=1,
                                            mode='constant', cval=0.0, prefilter=True)
 
-            # Loop through all spacial shift
+            # Loop through all spatial shift
             for shift_x in shift_list:
                 for shift_y in shift_list:
                     for shift_z in shift_list:
