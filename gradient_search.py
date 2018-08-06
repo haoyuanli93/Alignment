@@ -126,7 +126,7 @@ for l in range(iteration_number):
         movable_target = transformed
 
 # Refresh the movable target across all the nodes.
-movable_target = comm.Bcast(obj=movable_target, root=0)
+movable_target = comm.Bcast(movable_target, root=0)
 comm.Barrier()
 
 ########################################################################################################################
