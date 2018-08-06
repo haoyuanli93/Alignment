@@ -58,7 +58,7 @@ object_shape = movable_target.shape
 Due to my current setup, the searching precision is decided by the spatial precision and the angular precision
 of the rotation angle.
 """
-iteration_number = 9
+iteration_number = 2
 degree_spacing_list = numpy.power(0.5, numpy.arange(1, 10)) / 10.
 shift_spacing_list = numpy.power(0.5, numpy.arange(0, 9))
 
@@ -116,6 +116,7 @@ for l in range(iteration_number):
         # Save this transformed volume
         with h5py.File(file_name, 'r+') as h5file:
             grp = h5file.create_group("step_{}".format(l))
+            grp.create_dataset('iou_all', data=IoU_all)
             grp.create_dataset('volume', data=transformed)
             grp.create_dataset('axis', data=_axis)
             grp.create_dataset('angle', data=_angle)
