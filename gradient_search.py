@@ -63,12 +63,12 @@ degree_spacing_list = numpy.power(0.5, numpy.arange(1, 10)) / 10.
 shift_spacing_list = numpy.power(0.5, numpy.arange(0, 9))
 
 # Initialize the sampling of rotation axises.
-direction_spacing = 0.1
+direction_spacing = 0.2
 directions, _, dist_min = util.sample_full_2d_sphere(delta_theta=direction_spacing, delta_phi=direction_spacing)
 
 # specify some parameter concerning the searching of the rotation and translation.
-degree_num = 21
-shift_num = 11
+degree_num = 19
+shift_num = 9
 
 # All nodes generate a job list and find the portion of jobs belonging to itself.
 range_array = util.get_batch_range_list(util.get_batch_num_list(directions.shape[0], batch_num=comm_size))
@@ -125,9 +125,9 @@ for l in range(iteration_number):
         # After this iteration, replace movable_target with this optimal value.
         movable_target = transformed
 
-    # Refresh the movable target across all the nodes.
-    movable_target = comm.Bcast(obj=movable_target, root=0)
-    comm.Barrier()
+# Refresh the movable target across all the nodes.
+movable_target = comm.Bcast(obj=movable_target, root=0)
+comm.Barrier()
 
 ########################################################################################################################
 # Step 3: Do several other iterations of search
