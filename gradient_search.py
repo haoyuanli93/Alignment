@@ -94,7 +94,7 @@ for l in range(iteration_number):
     tic = time.time()
     times_start.append(tic)
     # Each node calculate the corresponding IoU values
-    IoU = tmp.calculate_iou(movable_target=movable_target, fixed_target=fixed_target,
+    IoU_list = tmp.calculate_iou(movable_target=movable_target, fixed_target=fixed_target,
                             job_start=job_start, job_stop=job_stop,
                             directions=directions, degrees=degrees, shift_list=shift_list)
     toc = time.time()
