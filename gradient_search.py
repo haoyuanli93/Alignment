@@ -95,8 +95,9 @@ for l in range(iteration_number):
     times_start.append(tic)
     # Each node calculate the corresponding IoU values
     IoU_list = tmp.calculate_iou(movable_target=movable_target, fixed_target=fixed_target,
-                            job_start=job_start, job_stop=job_stop,
-                            directions=directions, degrees=degrees, shift_list=shift_list)
+                                 job_start=job_start, job_stop=job_stop,
+                                 directions=directions, degrees=degrees, shift_list=shift_list)
+    print("HHH", numpy.max(IoU_list))
     toc = time.time()
     times_stop.append(toc)
     print("Node {} takes {:.2f} seconds to calculate {} IoU values.".format(comm_rank, toc - tic, IoU_list.shape[0]))
