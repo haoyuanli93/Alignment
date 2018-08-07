@@ -6,6 +6,7 @@ import scipy.ndimage
 import scipy.ndimage.interpolation
 import numpy
 import util
+import h5py as h5
 
 
 def calculate_iou(movable_target, fixed_target, job_start, job_stop, directions, degrees, shift_list):
@@ -111,9 +112,38 @@ def get_degree_and_shift_list(degree_num, shift_num, degree_range, shift_range):
 
     # Create the degree list
     holder = numpy.arange(-degree_num, degree_num + 1, dtype=numpy.float64) / degree_num
-    degree_list = degree_range * holder**3
+    degree_list = degree_range * holder ** 3
 
     holder = numpy.arange(-shift_num, shift_num + 1, dtype=numpy.float64) / shift_num
     shift_list = shift_range * holder ** 3
 
     return degree_list, shift_list
+
+
+def transform_based_on_the_searching_result(searching_result, target):
+    """
+    Transform the target object to the correct orientation and position
+
+    :param searching_result: The h5file containing all the searching results.
+    :param target: The numpy array to transform
+    :return: The transformed numpy array
+    """
+    # Make a copy
+    output_holder = numpy.copy(target)
+    with h5.File(searching_result) as h5file:
+        iter_num = int(h5file['iter_num'].value)
+        for l in range(iter_num):
+
+            # Extract a specified group
+            grp = h5file['step_{}'.format(l)]
+
+            # Get the info of this transformation
+            axis = numpy.array(grp['axis'])
+            angle = numpy.array(grp['angle'])
+            shift = numpy.array(grp['shift'])
+
+            # Transform
+            output_holder = util.rotation_and_shift(obj=output_holder, axis=axis, angle=angle, shift=shift)
+
+    return output_holder
+
